@@ -25,7 +25,9 @@ public class ExceptionEntry {
     private ExceptionEntry cause;
 
     public String getFullStacktrace() {
-        throw new RuntimeException("Not implemented yet (la stack comprenant ses stacks enfants");
+        return Objects.isNull(cause)
+                ? stacktrace
+                : stacktrace + "\n\tCaused by: " + cause.getMessage() + "\n" + cause.getFullStacktrace();
     }
 
     public String getFullCompanyStacktrace() {

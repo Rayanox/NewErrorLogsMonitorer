@@ -17,6 +17,7 @@ public class LogEntry {
     @NonNull private String classNameLog;
     @NonNull private LogLevel logLevel;
     @NonNull private LocalDateTime date;
+    private Boolean networkError;
 
     private ExceptionEntry exception;
 

@@ -21,7 +21,10 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
+
+import static java.util.Collections.emptyList;
 
 @Log4j2
 @SpringBootTest
@@ -60,7 +63,7 @@ public class LogServiceTest {
     @Test
     public void testLogReader_allSameDatetime() {
         ServiceProperties serviceConf = appProperties.of("mediation.front-office.mobile.bus");
-        List<LogEntry> logs = logService.readLogs(logInput, serviceConf);
+        List<LogEntry> logs = logService.readAllLogs(logInput, serviceConf);
 
         Assertions.assertEquals(45, logs.size());
 
@@ -89,9 +92,9 @@ public class LogServiceTest {
     @Test
     public void testLogReaderUpdated_allSameDatetime() {
         ServiceProperties serviceConf = appProperties.of("mediation.front-office.mobile.bus");
-        List<LogEntry> logsAlreadySaved = logService.readLogs(logInput, serviceConf);
+        List<LogEntry> logsAlreadySaved = logService.readAllLogs(logInput, serviceConf);
         LogEntry lastLogAlreadySaved = logsAlreadySaved.get(logsAlreadySaved.size()-1);
-        List<LogEntry> logs = logService.readLogs(logInputUpdated, lastLogAlreadySaved.getDate(), serviceConf);
+        List<LogEntry> logs = logService.readAllLogs(logInputUpdated, lastLogAlreadySaved.getDate(), serviceConf);
 
         Assertions.assertEquals(50, logs.size());
     }
@@ -101,9 +104,9 @@ public class LogServiceTest {
     @Test
     public void testLogReaderUpdated_withTwoDifferentDates() {
         ServiceProperties serviceConf = appProperties.of("mediation.front-office.mobile.bus");
-        List<LogEntry> logsAlreadySaved = logService.readLogs(logInput, serviceConf);
+        List<LogEntry> logsAlreadySaved = logService.readAllLogs(logInput, serviceConf);
         LogEntry lastLogAlreadySaved = logsAlreadySaved.get(logsAlreadySaved.size()-1);
-        List<LogEntry> logs = logService.readLogs(logInputUpdated2DifferentDates, lastLogAlreadySaved.getDate(), serviceConf);
+        List<LogEntry> logs = logService.readAllLogs(logInputUpdated2DifferentDates, lastLogAlreadySaved.getDate(), serviceConf);
 
         Assertions.assertEquals(2, logs.size());
     }
@@ -112,9 +115,9 @@ public class LogServiceTest {
     @Test
     public void testNewLogs_ZeroNewLog() {
         ServiceProperties serviceConf = appProperties.of("mediation.front-office.mobile.bus");
-        List<LogEntry> logsAlreadySaved = logService.readLogs(logInput, serviceConf);
+        List<LogEntry> logsAlreadySaved = logService.readAllLogs(logInput, serviceConf);
         LogEntry lastLogAlreadySaved = logsAlreadySaved.get(logsAlreadySaved.size()-1);
-        List<LogEntry> newLogsArrived = logService.readLogs(logInputUpdated, lastLogAlreadySaved.getDate(), serviceConf);
+        List<LogEntry> newLogsArrived = logService.readAllLogs(logInputUpdated, lastLogAlreadySaved.getDate(), serviceConf);
 
         var newLogsDetected = logService.getNewLogs(logsAlreadySaved, newLogsArrived);
 
@@ -124,9 +127,9 @@ public class LogServiceTest {
     @Test
     public void testNewLogs_OneNewLog() {
         ServiceProperties serviceConf = appProperties.of("mediation.front-office.mobile.bus");
-        List<LogEntry> logsAlreadySaved = logService.readLogs(logInput, serviceConf);
+        List<LogEntry> logsAlreadySaved = logService.readAllLogs(logInput, serviceConf);
         LogEntry lastLogAlreadySaved = logsAlreadySaved.get(logsAlreadySaved.size()-1);
-        List<LogEntry> newLogsArrived = logService.readLogs(logInputUpdatedNewLog, lastLogAlreadySaved.getDate(), serviceConf);
+        List<LogEntry> newLogsArrived = logService.readAllLogs(logInputUpdatedNewLog, lastLogAlreadySaved.getDate(), serviceConf);
 
         var newLogsDetected = logService.getNewLogs(logsAlreadySaved, newLogsArrived);
 
@@ -141,4 +144,27 @@ public class LogServiceTest {
         Assertions.assertEquals(1,singleNewLog.getException().getDepth());
         Assertions.assertEquals("at coucou.test\nat etoui.test",singleNewLog.getException().getStacktrace());
     }
+
+    @Test
+    public void distinctReadTest() {
+        ServiceProperties serviceConf = appProperties.of("mediation.front-office.mobile.bus");
+
+        List<LogEntry> logs = logService.readLogs(logInput, null, serviceConf);
+        List<LogEntry> newErrors = logService.getNewLogs(emptyList(), logs);
+
+        Assertions.assertEquals(5, logs.size());
+        Assertions.assertEquals(4, newErrors.size());
+    }
+
+    @Test
+    public void distinctReadWithDateTest() {
+        ServiceProperties serviceConf = appProperties.of("mediation.front-office.mobile.bus");
+        LocalDateTime afterDate = LocalDateTime.of(2023, 7, 2, 8, 54);
+
+        List<LogEntry> logs = logService.readLogs(logInputUpdated2DifferentDates, afterDate, serviceConf);
+
+        Assertions.assertEquals(2, logs.size());
+    }
+
+
 }

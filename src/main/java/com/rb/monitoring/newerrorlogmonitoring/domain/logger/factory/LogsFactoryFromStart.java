@@ -100,6 +100,7 @@ public class LogsFactoryFromStart extends LogsFactory {
             }else {
                 ExceptionEntry exception = processException(false);
                 logEntryBuilder.exception(exception);
+                logEntryBuilder.networkError(isNetworkException(exception, serviceConf));
                 saveLastLogEntry();
             }
         }
