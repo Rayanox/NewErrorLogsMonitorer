@@ -29,12 +29,19 @@ public class Core {
 
 //        var oldLogs = logService.readOldLogs();
 //
-//        for (var service : appProperties.getServices()) {
-//            var logs = logConsumer.fetchLogs(service);
+        for (var service : appProperties.getServices()) {
+            var logs = logConsumer.fetchLogs(service);
+            int i = 0;
+            i++;
+            //TODO: 1) Lecture DB
+            //TODO: 2) Intégrer la diff et la notification
+            //TODO: 3) Ecriture DB des nouvelles entrées
+
+
 //            var logEntries = logService.readLogs(logs, service);
 //            var newLogs = logService.diffLogs(logEntries, oldLogs);
 //            var diffLogs = logService.ruleNewLogsDetected(newLogs);
 //            logService.notifyNewLogsDetected(diffLogs);
-//        }
+        }
     }
 }

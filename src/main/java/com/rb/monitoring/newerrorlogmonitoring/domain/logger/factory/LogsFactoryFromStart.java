@@ -1,7 +1,7 @@
 package com.rb.monitoring.newerrorlogmonitoring.domain.logger.factory;
 
 import com.rb.monitoring.newerrorlogmonitoring.application.configuration.AppProperties;
-import com.rb.monitoring.newerrorlogmonitoring.domain.common.ServiceProperties;
+import com.rb.monitoring.newerrorlogmonitoring.application.configuration.services.ServiceProperties;
 import com.rb.monitoring.newerrorlogmonitoring.domain.common.utils.RegexUtils;
 import com.rb.monitoring.newerrorlogmonitoring.domain.logger.dto.ExceptionEntry;
 import com.rb.monitoring.newerrorlogmonitoring.domain.logger.dto.LogEntry;
@@ -51,11 +51,11 @@ public class LogsFactoryFromStart extends LogsFactory {
         for (String logLine : logInputUpdated) {
             indexStartSubstring++;
 
-            if(!isNewLogEntryLine(logLine, serviceConf.getPatternNewEntry())) {
+            if(!isNewLogEntryLine(logLine, serviceConf.getPatterns().getPatternNewEntry())) {
                 continue;
             }
 
-            LocalDateTime logLineDate = getDate(logLine, serviceConf.getPatternDate(), serviceConf.getPatternDateFormatter(), indexStartSubstring);
+            LocalDateTime logLineDate = getDate(logLine, serviceConf.getPatterns().getPatternDate(), serviceConf.getPatterns().getPatternDateFormatter(), indexStartSubstring);
             if(logLineDate.isAfter(startDateExcluded)) {
                 return OptionalInt.of(indexStartSubstring);
             }
@@ -95,7 +95,7 @@ public class LogsFactoryFromStart extends LogsFactory {
         while(logs.hasNext()) {
             getNextLine();
 
-            if(isNewLogEntryLine(currentLogLine, serviceConf.getPatternNewEntry())) {
+            if(isNewLogEntryLine(currentLogLine, serviceConf.getPatterns().getPatternNewEntry())) {
                 processNewLogEntryLine();
             }else {
                 ExceptionEntry exception = processException(false);
@@ -125,14 +125,14 @@ public class LogsFactoryFromStart extends LogsFactory {
                 messageLines.add(getMessage());
                 logEntryBuilder.classNameLog(getClassName());
                 logEntryBuilder.logLevel(getLogLevel());
-                logEntryBuilder.date(getDate(currentLogLine, serviceConf.getPatternDate(), serviceConf.getPatternDateFormatter(), lineIndex));
+                logEntryBuilder.date(getDate(currentLogLine, serviceConf.getPatterns().getPatternDate(), serviceConf.getPatterns().getPatternDateFormatter(), lineIndex));
             }else {
                 messageLines.add(currentLogLine);
             }
             getNextLine();
-        } while(logs.hasNext() && !isStacktraceLine() && !isNewLogEntryLine(currentLogLine, serviceConf.getPatternNewEntry()));
+        } while(logs.hasNext() && !isStacktraceLine() && !isNewLogEntryLine(currentLogLine, serviceConf.getPatterns().getPatternNewEntry()));
 
-        if(isNewLogEntryLine(currentLogLine, serviceConf.getPatternNewEntry())) {
+        if(isNewLogEntryLine(currentLogLine, serviceConf.getPatterns().getPatternNewEntry())) {
             logEntryBuilder.message(String.join("\n", messageLines));
             saveLastLogEntry();
             keepSameLine = true;
@@ -146,26 +146,6 @@ public class LogsFactoryFromStart extends LogsFactory {
         }
         logEntryBuilder.message(String.join("\n", messageLines));
     }
-
-//    private void processEmptyRangeLine() {
-//        if(emptyRangeLineValidatorChain == null) {
-//            emptyRangeLineValidatorChain = buildValidatorChainForSkippingAfterMessage();
-//            inEmptyRangeLine = true;
-//        }
-//        emptyRangeLineValidatorChain = emptyRangeLineValidatorChain.chain(currentLogLine);
-//        if(emptyRangeLineValidatorChain == null) {
-//            inEmptyRangeLine = false;
-//        }
-//    }
-
-//    private LineValidatorChain buildValidatorChainForSkippingAfterMessage() {
-//        return LineValidatorChain.builder()
-//                .predicateMatch(logLine -> logLine.startsWith("Stacktrace"))
-//                .next(LineValidatorChain.builder()
-//                        .predicateMatch(logLine -> logLine.startsWith("-----------------"))
-//                        .build())
-//                .build();
-//    }
 
     private static boolean isNewLogEntryLine(String logLine, String patternNewEntry) {
         return RegexUtils.matches(logLine, patternNewEntry);
@@ -185,40 +165,13 @@ public class LogsFactoryFromStart extends LogsFactory {
         lineIndex++;
     }
 
-//
-//    public List<LogEntry> process() {
-//        while(logs.hasNext()) {
-//            String logLine = logs.next();
-//
-//            if(isNewLog(logLine)) {
-//                saveLastLogEntry();
-//                logEntryBuilder = LogEntry.builder();
-//                isInExceptionProcessing = false;
-//            }else {
-//                isInExceptionProcessing = true;
-//            }
-//
-//            if(isInExceptionProcessing) {
-//                ExceptionEntry exception = processException();
-//                logEntryBuilder.exception(exception);
-//            }else {
-//                logEntryBuilder.message(getMessage(logLine));
-//                logEntryBuilder.classNameLog(getClassName(logLine));
-//                logEntryBuilder.logLevel(getLogLevel(logLine));
-//                logEntryBuilder.date(getDate(logLine));
-//            }
-//        }
-//        saveLastLogEntry();
-//        return logEntries;
-//    }
-
     private ExceptionEntry processException(boolean isCausedBy) {
         ExceptionEntry.ExceptionEntryBuilder builder = ExceptionEntry.builder();
         resetBuilders();
 
         builder.message(getExceptionMessage(isCausedBy));
 
-        while(!keepSameLine && !isNewLogEntryLine(currentLogLine, serviceConf.getPatternNewEntry())) {
+        while(!keepSameLine && !isNewLogEntryLine(currentLogLine, serviceConf.getPatterns().getPatternNewEntry())) {
             processStackTrace(builder);
         }
 //        builder.fullStacktrace(fullStacktraceBuilder.toString());
@@ -235,7 +188,7 @@ public class LogsFactoryFromStart extends LogsFactory {
         getNextLine();
         firstStacktraceLine = false;
 
-        if(isNewLogEntryLine(currentLogLine, serviceConf.getPatternNewEntry())) {
+        if(isNewLogEntryLine(currentLogLine, serviceConf.getPatterns().getPatternNewEntry())) {
             setStacktraces(builder);
             keepSameLine = true;
             return;
@@ -272,15 +225,6 @@ public class LogsFactoryFromStart extends LogsFactory {
         builder.companyStacktrace(notEmty(companyStacktrace));
         builder.endOfStacktrace(getEndOfStacktrace(stacktrace));
     }
-
-
-//    private void enrichCompanyBuilder() {
-//        if (!companyStacktraceBuilder.isEmpty()) {
-//            companyStacktraceBuilder.append("..." + "\n");
-//        } else {
-//            builder.companyStacktrace(notEmty(companyStacktraceBuilder.toString()));
-//        }
-//    }
 
     private String getEndOfStacktrace(String stacktrace) {
         String[] stacktraceLines = stacktrace.split("\n");

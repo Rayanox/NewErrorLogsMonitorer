@@ -1,6 +1,6 @@
 package com.rb.monitoring.newerrorlogmonitoring.domain.common.utils;
 
-import com.rb.monitoring.newerrorlogmonitoring.domain.common.ServiceProperties;
+import com.rb.monitoring.newerrorlogmonitoring.application.configuration.services.ServiceProperties;
 import com.rb.monitoring.newerrorlogmonitoring.domain.logger.dto.ExceptionEntry;
 
 import java.util.Objects;
@@ -25,7 +25,7 @@ public class ExceptionUtil {
     }
 
     public static boolean isNetworkException(ExceptionEntry e, ServiceProperties serviceProperties) {
-        return RegexUtils.matches(e.getMessage(), serviceProperties.getPatternExceptionMessageErrorNetwork());
+        return RegexUtils.matches(e.getMessage(), serviceProperties.getPatterns().getPatternExceptionMessageErrorNetwork());
     }
 
 }

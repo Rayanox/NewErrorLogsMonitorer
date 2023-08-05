@@ -1,11 +1,9 @@
-package com.rb.monitoring.newerrorlogmonitoring.domain.common;
+package com.rb.monitoring.newerrorlogmonitoring.application.configuration.services;
 
 import lombok.Data;
 
 @Data
-public class ServiceProperties {
-
-    private String serviceName;
+public class LogPatternProperties {
     private String patternNewEntry;
     private String patternStackTraceLine;
     private String patternExceptionMessageErrorNetwork;
@@ -16,5 +14,4 @@ public class ServiceProperties {
     private String patternLogLevel;
     private String patternCausedByMessage;
     private String patternDateFormatter;
-
 }

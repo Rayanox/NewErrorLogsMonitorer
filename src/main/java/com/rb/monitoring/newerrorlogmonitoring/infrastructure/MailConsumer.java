@@ -1,6 +1,6 @@
 package com.rb.monitoring.newerrorlogmonitoring.infrastructure;
 
-import com.rb.monitoring.newerrorlogmonitoring.domain.common.ServiceProperties;
+import com.rb.monitoring.newerrorlogmonitoring.application.configuration.services.ServiceProperties;
 import com.rb.monitoring.newerrorlogmonitoring.domain.logger.dto.LogEntry;
 import lombok.AllArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;

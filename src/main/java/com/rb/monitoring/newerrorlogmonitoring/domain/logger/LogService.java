@@ -1,7 +1,7 @@
 package com.rb.monitoring.newerrorlogmonitoring.domain.logger;
 
 import com.rb.monitoring.newerrorlogmonitoring.application.configuration.AppProperties;
-import com.rb.monitoring.newerrorlogmonitoring.domain.common.ServiceProperties;
+import com.rb.monitoring.newerrorlogmonitoring.application.configuration.services.ServiceProperties;
 import com.rb.monitoring.newerrorlogmonitoring.domain.logger.dto.LogEntry;
 import com.rb.monitoring.newerrorlogmonitoring.domain.logger.factory.LogsFactoryFromStart;
 import lombok.RequiredArgsConstructor;

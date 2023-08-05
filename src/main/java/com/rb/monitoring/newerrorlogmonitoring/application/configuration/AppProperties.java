@@ -1,6 +1,6 @@
 package com.rb.monitoring.newerrorlogmonitoring.application.configuration;
 
-import com.rb.monitoring.newerrorlogmonitoring.domain.common.ServiceProperties;
+import com.rb.monitoring.newerrorlogmonitoring.application.configuration.services.ServiceProperties;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

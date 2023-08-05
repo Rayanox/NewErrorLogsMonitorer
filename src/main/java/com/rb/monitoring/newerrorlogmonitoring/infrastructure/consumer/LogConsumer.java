@@ -1,6 +1,6 @@
 package com.rb.monitoring.newerrorlogmonitoring.infrastructure.consumer;
 
-import com.rb.monitoring.newerrorlogmonitoring.domain.common.ServiceProperties;
+import com.rb.monitoring.newerrorlogmonitoring.application.configuration.services.ServiceProperties;
 import org.springframework.stereotype.Service;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -10,16 +10,12 @@ import java.util.List;
 @Service
 public class LogConsumer {
 
-    //FIXME: integrer dans les properties
-    private String urlApi = "http://logs.in.karavel.com/logs/rfo/webpreprod02/var/log/tomcat53-svc-sejour.catalogue/catalogue.sejour.pojo.soap.ws.log";
-    private String headerAuthorization = "Basic cmJlbmhtaWRhbmU6S3FWWkZtWTI=";
-
     private final HttpClient client = HttpClient.newHttpClient();
 
     public List<String> fetchLogs(ServiceProperties serviceProperties) {
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(java.net.URI.create(urlApi))
-                .setHeader("Authorization", headerAuthorization)
+                .uri(java.net.URI.create(serviceProperties.getLogServers().getUrl()))
+                .setHeader("Authorization", "BASIC " + serviceProperties.getLogServers().getBasicAuthToken())
                 .build();
 
         HttpResponse<String> response;

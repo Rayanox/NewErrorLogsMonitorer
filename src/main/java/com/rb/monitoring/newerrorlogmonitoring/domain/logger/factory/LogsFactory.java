@@ -1,7 +1,7 @@
 package com.rb.monitoring.newerrorlogmonitoring.domain.logger.factory;
 
 import com.rb.monitoring.newerrorlogmonitoring.application.configuration.AppProperties;
-import com.rb.monitoring.newerrorlogmonitoring.domain.common.ServiceProperties;
+import com.rb.monitoring.newerrorlogmonitoring.application.configuration.services.ServiceProperties;
 import com.rb.monitoring.newerrorlogmonitoring.domain.common.utils.RegexUtils;
 import com.rb.monitoring.newerrorlogmonitoring.domain.logger.dto.LogEntry;
 import org.springframework.boot.logging.LogLevel;
@@ -46,21 +46,21 @@ public abstract class LogsFactory {
     }
 
     protected LogLevel getLogLevel() {
-        String level = extractByRegex(currentLogLine, serviceConf.getPatternLogLevel(), lineIndex);
+        String level = extractByRegex(currentLogLine, serviceConf.getPatterns().getPatternLogLevel(), lineIndex);
         return LogLevel.valueOf(level.toUpperCase(Locale.getDefault()));
     }
 
     protected String getClassName() {
-        return extractByRegex(currentLogLine, serviceConf.getPatternClassName(), lineIndex);
+        return extractByRegex(currentLogLine, serviceConf.getPatterns().getPatternClassName(), lineIndex);
     }
 
     protected String getMessage() {
-        return extractByRegex(currentLogLine, serviceConf.getPatternMessage(), lineIndex);
+        return extractByRegex(currentLogLine, serviceConf.getPatterns().getPatternMessage(), lineIndex);
     }
 
     protected String getExceptionMessage(boolean isCausedBy) {
         if(isCausedBy) {
-            return extractByRegex(currentLogLine, serviceConf.getPatternCausedByMessage(), lineIndex);
+            return extractByRegex(currentLogLine, serviceConf.getPatterns().getPatternCausedByMessage(), lineIndex);
         }else {
             var previousLogLine = logLinesInput.get(lineIndex-1);
             return replaceIdInstance(previousLogLine.trim());
@@ -71,7 +71,7 @@ public abstract class LogsFactory {
         return currentLogLine.startsWith("Caused by:");
     }
     protected boolean isStacktraceLine() {
-        return RegexUtils.matches(currentLogLine, serviceConf.getPatternStackTraceLine());
+        return RegexUtils.matches(currentLogLine, serviceConf.getPatterns().getPatternStackTraceLine());
     }
 
     /*
