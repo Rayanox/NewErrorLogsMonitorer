@@ -2,6 +2,8 @@ package com.rb.monitoring.newerrorlogmonitoring.domain.logger.factory;
 
 import com.rb.monitoring.newerrorlogmonitoring.application.configuration.AppProperties;
 import com.rb.monitoring.newerrorlogmonitoring.application.configuration.services.ServiceProperties;
+import com.rb.monitoring.newerrorlogmonitoring.domain.common.Service;
+import com.rb.monitoring.newerrorlogmonitoring.domain.common.exceptions.ServerDownException;
 import com.rb.monitoring.newerrorlogmonitoring.domain.common.utils.RegexUtils;
 import com.rb.monitoring.newerrorlogmonitoring.domain.logger.dto.ExceptionEntry;
 import com.rb.monitoring.newerrorlogmonitoring.domain.logger.dto.LogEntry;
@@ -14,6 +16,7 @@ import java.util.*;
 import static com.rb.monitoring.newerrorlogmonitoring.domain.common.utils.ExceptionUtil.isNetworkException;
 import static com.rb.monitoring.newerrorlogmonitoring.domain.common.utils.StringUtil.notEmty;
 import static com.rb.monitoring.newerrorlogmonitoring.domain.common.utils.StringUtil.removeLastLineReturnIfPresent;
+import static java.util.Optional.ofNullable;
 
 @Log4j2
 public class LogsFactoryFromStart extends LogsFactory {
@@ -155,10 +158,20 @@ public class LogsFactoryFromStart extends LogsFactory {
     private void getNextLine() {
         if(!firstStacktraceLine && !keepSameLine) {
             incrementLine();
+            throwIFServerDown();
         }
         if(keepSameLine) {
             keepSameLine = false;
         }
+    }
+
+    private void throwIFServerDown() {
+        ofNullable(serviceConf.getPatterns().getPatternDeadServer())
+                .ifPresent(pattern -> {
+                    if (RegexUtils.matches(currentLogLine, pattern)) {
+                        throw new ServerDownException(serviceConf, serviceConf);
+                    }
+                });
     }
 
     private void incrementLine() {

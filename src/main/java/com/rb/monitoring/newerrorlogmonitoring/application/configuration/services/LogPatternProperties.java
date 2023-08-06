@@ -7,6 +7,7 @@ public class LogPatternProperties {
     private String patternNewEntry;
     private String patternStackTraceLine;
     private String patternExceptionMessageErrorNetwork;
+    private String patternDeadServer;
 
     private String patternDate;
     private String patternClassName;

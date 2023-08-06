@@ -10,7 +10,9 @@ import java.util.List;
 @ConfigurationProperties(prefix = "app")
 public class AppProperties {
 
+    private String applicationName;
     private String companyPackage;
+    private String restUrlLogExposed;
 
     private List<ServiceProperties> services;
 
