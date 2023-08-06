@@ -46,7 +46,7 @@ public class Core {
                 prepareEntities(newLogsDetected, serverLogEntries, serviceDb, logEntriesDb);
                 servicesRepository.save(serviceDb);
 
-                if(application.isIndexed()) {
+                if(application.isFirstIndexed()) {
                     notifications.notifySubscribers(newLogsDetected);
                 }
             }catch (ServerDownException e) {
@@ -71,7 +71,6 @@ public class Core {
         var applicationSaved = applicationRepository.findAll().stream().findFirst();
         if(applicationSaved.isEmpty()) {
             var newApplication = Application.builder()
-                    .indexed(false)
                     .build();
             applicationRepository.saveAndFlush(newApplication);
             return newApplication;
@@ -80,8 +79,7 @@ public class Core {
     }
 
     private void updateApplicationState(Application application) {
-        if(!application.isIndexed()) {
-            application.setIndexed(true);
+        if(!application.isFirstIndexed()) {
             application.setFirstIndexationDate(LocalDateTime.now());
         }
         application.setLastProcessedDate(LocalDateTime.now());

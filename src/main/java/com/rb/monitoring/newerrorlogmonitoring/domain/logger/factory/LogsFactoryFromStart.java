@@ -2,7 +2,6 @@ package com.rb.monitoring.newerrorlogmonitoring.domain.logger.factory;
 
 import com.rb.monitoring.newerrorlogmonitoring.application.configuration.AppProperties;
 import com.rb.monitoring.newerrorlogmonitoring.application.configuration.services.ServiceProperties;
-import com.rb.monitoring.newerrorlogmonitoring.domain.common.Service;
 import com.rb.monitoring.newerrorlogmonitoring.domain.common.exceptions.ServerDownException;
 import com.rb.monitoring.newerrorlogmonitoring.domain.common.utils.RegexUtils;
 import com.rb.monitoring.newerrorlogmonitoring.domain.logger.dto.ExceptionEntry;
@@ -25,6 +24,7 @@ public class LogsFactoryFromStart extends LogsFactory {
 
     private boolean firstStacktraceLine = false;
     private boolean keepSameLine = false;
+    private boolean forceExit = false;
 
     private StringBuilder stacktraceBuilder;
     private StringBuilder fullStacktraceBuilder;
@@ -95,7 +95,7 @@ public class LogsFactoryFromStart extends LogsFactory {
 //    }
 
     public List<LogEntry> process() {
-        while(logs.hasNext()) {
+        while(logs.hasNext() && !forceExit) {
             getNextLine();
 
             if(isNewLogEntryLine(currentLogLine, serviceConf.getPatterns().getPatternNewEntry())) {
@@ -134,7 +134,7 @@ public class LogsFactoryFromStart extends LogsFactory {
                 messageLines.add(currentLogLine);
             }
             getNextLine();
-        } while(logs.hasNext() && !isStacktraceLine() && !isNewLogEntryLine(currentLogLine, serviceConf.getPatterns().getPatternNewEntry()));
+        } while(logs.hasNext() && !isStacktraceLine() && !isNewLogEntryLine(currentLogLine, serviceConf.getPatterns().getPatternNewEntry()) && !forceExit);
 
         if(isNewLogEntryLine(currentLogLine, serviceConf.getPatterns().getPatternNewEntry())) {
             logEntryBuilder.message(String.join("\n", messageLines));
@@ -175,6 +175,10 @@ public class LogsFactoryFromStart extends LogsFactory {
     }
 
     private void incrementLine() {
+        if(!logs.hasNext()) {
+            forceExit = true;
+            return;
+        }
         currentLogLine = logs.next();
         lineIndex++;
     }

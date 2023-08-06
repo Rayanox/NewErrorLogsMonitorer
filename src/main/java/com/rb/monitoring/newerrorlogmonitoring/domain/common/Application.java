@@ -19,12 +19,14 @@ public class Application {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private boolean indexed;
-
     private LocalDateTime firstIndexationDate;
 
     private LocalDateTime lastProcessedDate;
 
     @Transient
     private LocalDateTime nextProcessingDate;
+
+    public boolean isFirstIndexed() {
+        return firstIndexationDate != null;
+    }
 }
