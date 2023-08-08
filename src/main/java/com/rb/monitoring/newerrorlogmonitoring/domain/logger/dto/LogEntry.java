@@ -2,7 +2,8 @@ package com.rb.monitoring.newerrorlogmonitoring.domain.logger.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.rb.monitoring.newerrorlogmonitoring.domain.common.Service;
+import com.rb.monitoring.newerrorlogmonitoring.domain.common.Environment;
+import com.rb.monitoring.newerrorlogmonitoring.domain.status.Status;
 import jakarta.persistence.*;
 import lombok.*;
 import org.apache.commons.lang3.BooleanUtils;
@@ -28,28 +29,40 @@ public class LogEntry {
     private String message;
     @NonNull
     private String classNameLog;
-    @Enumerated(EnumType.STRING)
     @NonNull
+    @Enumerated(EnumType.STRING)
     private LogLevel logLevel;
     @NonNull
     private LocalDateTime date;
+    @OneToOne(cascade = CascadeType.ALL)
+    private Status status;
     private Boolean networkError;
+
+
 
 //    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "logEntry")
     @OneToOne(cascade = CascadeType.ALL)
     private ExceptionEntry exception;
     @JsonIgnore
-    @ManyToOne
-    private Service service;
+    @ManyToOne(targetEntity = Environment.class, fetch = FetchType.LAZY)
+    private Environment environment;
 
     @Override
     public String toString() {
         var networkErrorText = BooleanUtils.isTrue(this.networkError) ? "[NetworkError] - " : "";
-        return networkErrorText + "LogEntry{" +
-                "id=" + id +
-                ", date=" + date +
-                ", service=" + service +
-                ", message='" + message + '\'' +
-                '}';
+
+        StringBuilder builder = new StringBuilder(networkErrorText);
+        builder.append("LogEntry{")
+                .append("id=").append(id)
+                .append(", date=").append(date);
+        if (environment != null) {
+            builder.append(", environment=").append(environment);
+            if (environment.getService() != null) {
+                builder.append(", service=").append(environment.getService().getServiceName());
+            }
+        }
+        builder.append(", message='").append(message).append('\'')
+                .append('}');
+        return builder.toString();
     }
 }

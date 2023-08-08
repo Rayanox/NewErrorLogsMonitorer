@@ -1,6 +1,7 @@
 package com.rb.monitoring.newerrorlogmonitoring.infrastructure.consumer;
 
 import com.rb.monitoring.newerrorlogmonitoring.application.configuration.services.ServiceProperties;
+import com.rb.monitoring.newerrorlogmonitoring.application.configuration.services.environment.EnvironmentWrapperConfig;
 import org.springframework.stereotype.Service;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -12,10 +13,12 @@ public class LogConsumer {
 
     private final HttpClient client = HttpClient.newHttpClient();
 
-    public List<String> fetchLogs(ServiceProperties serviceProperties) {
+    public List<String> fetchLogs(EnvironmentWrapperConfig environmentConf) {
+        var logServerProperties = environmentConf.getServiceProperties().getLogServers();
+
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(java.net.URI.create(serviceProperties.getLogServers().getUrl()))
-                .setHeader("Authorization", "BASIC " + serviceProperties.getLogServers().getBasicAuthToken())
+                .uri(java.net.URI.create(logServerProperties.getUrl()))
+                .setHeader("Authorization", "BASIC " + logServerProperties.getBasicAuthToken())
                 .build();
 
         HttpResponse<String> response;

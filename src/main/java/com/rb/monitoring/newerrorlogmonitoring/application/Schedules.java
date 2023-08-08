@@ -1,5 +1,6 @@
 package com.rb.monitoring.newerrorlogmonitoring.application;
 
+import com.rb.monitoring.newerrorlogmonitoring.application.configuration.AppProperties;
 import com.rb.monitoring.newerrorlogmonitoring.domain.common.services.NotificationService;
 import com.rb.monitoring.newerrorlogmonitoring.domain.common.exceptions.ExceptionEntity;
 import com.rb.monitoring.newerrorlogmonitoring.domain.common.utils.ExceptionUtil;
@@ -12,6 +13,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Log4j2
 @Component
@@ -19,17 +21,43 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class Schedules {
 
+    private final AppProperties appProperties;
     private final Core core;
     private final ExceptionRepository exceptionRepository;
     private final NotificationService notifications;
 
-    @Scheduled(fixedDelayString = "#{${app.cron.minutes-intervalle} * 60000}") //Every 2 minutes
+    @Scheduled(fixedDelayString = "#{${app.cron.minutes-intervalle} * 60000}")
     public void cron() {
+        if(isDisablePeriod()) {
+            log.debug("Cron is disabled");
+            return;
+        }
+
         try {
             core.process();
         } catch (Exception e) {
             persistException(e);
             notifications.notifySubscribers(new Exception("Error catched by cron", e));
+        }
+    }
+
+    private boolean isDisablePeriod() {
+        LocalTime now = LocalTime.now();
+        LocalTime disableHourFrom = LocalTime.of(appProperties.getDisableHourFrom(), 0);
+        LocalTime disableHourTo = LocalTime.of(appProperties.getDisableHourTo(), 0);
+
+        if (disableHourFrom.isAfter(disableHourTo)) {
+            if (now.isBefore(disableHourTo) || now.isAfter(disableHourFrom)) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            if (now.isBefore(disableHourTo) && now.isAfter(disableHourFrom)) {
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 

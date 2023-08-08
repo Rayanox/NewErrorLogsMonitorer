@@ -1,7 +1,9 @@
 package com.rb.monitoring.newerrorlogmonitoring;
 
 import com.rb.monitoring.newerrorlogmonitoring.application.configuration.AppProperties;
+import com.rb.monitoring.newerrorlogmonitoring.application.configuration.services.ServiceConfItem;
 import com.rb.monitoring.newerrorlogmonitoring.application.configuration.services.ServiceProperties;
+import com.rb.monitoring.newerrorlogmonitoring.application.configuration.services.environment.EnvironmentWrapperConfig;
 import com.rb.monitoring.newerrorlogmonitoring.domain.logger.dto.ExceptionEntry;
 import com.rb.monitoring.newerrorlogmonitoring.domain.logger.dto.LogEntry;
 import com.rb.monitoring.newerrorlogmonitoring.domain.logger.LogService;
@@ -38,13 +40,20 @@ public class LogServiceTest {
     private static final String LOGFILE_UPDATED_2DIFFERENT_DATES_TEST_PATH = "mediation.front-office.mobile.bus-updatedWith2DifferentDates.log";
 
     @Autowired
-    private AppProperties appProperties;
+    private List<ServiceConfItem> serviceConfItems;
     @Autowired
     private LogService logService;
     private List<String> logInput;
     private List<String> logInputUpdated;
     private List<String> logInputUpdatedNewLog;
     private List<String> logInputUpdated2DifferentDates;
+
+    private ServiceConfItem of(String serviceName) {
+        return serviceConfItems.stream()
+                .filter(serviceConf -> serviceConf.getServiceName().contains(serviceName))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Service '"+ serviceName +"'not found"));
+    }
 
     @BeforeAll
     public void initLogInput() {
@@ -62,8 +71,9 @@ public class LogServiceTest {
 
     @Test
     public void testLogReader_allSameDatetime() {
-        ServiceProperties serviceConf = appProperties.of("mediation.front-office.mobile.bus");
-        List<LogEntry> logs = logService.readAllLogs(logInput, serviceConf);
+        ServiceConfItem serviceConf = of("mediation.front-office.mobile.bus");
+        EnvironmentWrapperConfig environment = serviceConf.getEnvironments().get(0);
+        List<LogEntry> logs = logService.readAllLogs(logInput, serviceConf, environment);
 
         Assertions.assertEquals(45, logs.size());
 
@@ -91,10 +101,11 @@ public class LogServiceTest {
 
     @Test
     public void testLogReaderUpdated_allSameDatetime() {
-        ServiceProperties serviceConf = appProperties.of("mediation.front-office.mobile.bus");
-        List<LogEntry> logsAlreadySaved = logService.readAllLogs(logInput, serviceConf);
+        ServiceConfItem serviceConf = of("mediation.front-office.mobile.bus");
+        EnvironmentWrapperConfig environment = serviceConf.getEnvironments().get(0);
+        List<LogEntry> logsAlreadySaved = logService.readAllLogs(logInput, serviceConf, environment);
         LogEntry lastLogAlreadySaved = logsAlreadySaved.get(logsAlreadySaved.size()-1);
-        List<LogEntry> logs = logService.readAllLogs(logInputUpdated, lastLogAlreadySaved.getDate(), serviceConf);
+        List<LogEntry> logs = logService.readAllLogs(logInputUpdated, lastLogAlreadySaved.getDate(), serviceConf, environment);
 
         Assertions.assertEquals(50, logs.size());
     }
@@ -103,10 +114,12 @@ public class LogServiceTest {
 
     @Test
     public void testLogReaderUpdated_withTwoDifferentDates() {
-        ServiceProperties serviceConf = appProperties.of("mediation.front-office.mobile.bus");
-        List<LogEntry> logsAlreadySaved = logService.readAllLogs(logInput, serviceConf);
+        ServiceConfItem serviceConf = of("mediation.front-office.mobile.bus");
+        EnvironmentWrapperConfig environment = serviceConf.getEnvironments().get(0);
+
+        List<LogEntry> logsAlreadySaved = logService.readAllLogs(logInput, serviceConf, environment);
         LogEntry lastLogAlreadySaved = logsAlreadySaved.get(logsAlreadySaved.size()-1);
-        List<LogEntry> logs = logService.readAllLogs(logInputUpdated2DifferentDates, lastLogAlreadySaved.getDate(), serviceConf);
+        List<LogEntry> logs = logService.readAllLogs(logInputUpdated2DifferentDates, lastLogAlreadySaved.getDate(), serviceConf, environment);
 
         Assertions.assertEquals(2, logs.size());
     }
@@ -114,10 +127,12 @@ public class LogServiceTest {
 
     @Test
     public void testNewLogs_ZeroNewLog() {
-        ServiceProperties serviceConf = appProperties.of("mediation.front-office.mobile.bus");
-        List<LogEntry> logsAlreadySaved = logService.readAllLogs(logInput, serviceConf);
+        ServiceConfItem serviceConf = of("mediation.front-office.mobile.bus");
+        EnvironmentWrapperConfig environment = serviceConf.getEnvironments().get(0);
+
+        List<LogEntry> logsAlreadySaved = logService.readAllLogs(logInput, serviceConf, environment);
         LogEntry lastLogAlreadySaved = logsAlreadySaved.get(logsAlreadySaved.size()-1);
-        List<LogEntry> newLogsArrived = logService.readAllLogs(logInputUpdated, lastLogAlreadySaved.getDate(), serviceConf);
+        List<LogEntry> newLogsArrived = logService.readAllLogs(logInputUpdated, lastLogAlreadySaved.getDate(), serviceConf, environment);
 
         var newLogsDetected = logService.getNewLogs(logsAlreadySaved, newLogsArrived);
 
@@ -126,10 +141,12 @@ public class LogServiceTest {
 
     @Test
     public void testNewLogs_OneNewLog() {
-        ServiceProperties serviceConf = appProperties.of("mediation.front-office.mobile.bus");
-        List<LogEntry> logsAlreadySaved = logService.readAllLogs(logInput, serviceConf);
+        ServiceConfItem serviceConf = of("mediation.front-office.mobile.bus");
+        EnvironmentWrapperConfig environment = serviceConf.getEnvironments().get(0);
+
+        List<LogEntry> logsAlreadySaved = logService.readAllLogs(logInput, serviceConf, environment);
         LogEntry lastLogAlreadySaved = logsAlreadySaved.get(logsAlreadySaved.size()-1);
-        List<LogEntry> newLogsArrived = logService.readAllLogs(logInputUpdatedNewLog, lastLogAlreadySaved.getDate(), serviceConf);
+        List<LogEntry> newLogsArrived = logService.readAllLogs(logInputUpdatedNewLog, lastLogAlreadySaved.getDate(), serviceConf, environment);
 
         var newLogsDetected = logService.getNewLogs(logsAlreadySaved, newLogsArrived);
 
@@ -147,9 +164,10 @@ public class LogServiceTest {
 
     @Test
     public void distinctReadTest() {
-        ServiceProperties serviceConf = appProperties.of("mediation.front-office.mobile.bus");
+        ServiceConfItem serviceConf = of("mediation.front-office.mobile.bus");
+        EnvironmentWrapperConfig environment = serviceConf.getEnvironments().get(0);
 
-        List<LogEntry> logs = logService.readLogs(logInput, null, serviceConf);
+        List<LogEntry> logs = logService.readLogs(logInput, null, serviceConf, environment);
         List<LogEntry> newErrors = logService.getNewLogs(emptyList(), logs);
 
         Assertions.assertEquals(5, logs.size());
@@ -158,10 +176,11 @@ public class LogServiceTest {
 
     @Test
     public void distinctReadWithDateTest() {
-        ServiceProperties serviceConf = appProperties.of("mediation.front-office.mobile.bus");
+        ServiceConfItem serviceConf = of("mediation.front-office.mobile.bus");
+        EnvironmentWrapperConfig environment = serviceConf.getEnvironments().get(0);
         LocalDateTime afterDate = LocalDateTime.of(2023, 7, 2, 8, 54);
 
-        List<LogEntry> logs = logService.readLogs(logInputUpdated2DifferentDates, afterDate, serviceConf);
+        List<LogEntry> logs = logService.readLogs(logInputUpdated2DifferentDates, afterDate, serviceConf, environment);
 
         Assertions.assertEquals(2, logs.size());
     }

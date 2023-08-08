@@ -4,10 +4,12 @@ import com.rb.monitoring.newerrorlogmonitoring.application.configuration.AppProp
 import com.rb.monitoring.newerrorlogmonitoring.application.configuration.Subscribers;
 import com.rb.monitoring.newerrorlogmonitoring.application.configuration.notifications.MailProperties;
 import com.rb.monitoring.newerrorlogmonitoring.domain.common.exceptions.ServerDownException;
+import com.rb.monitoring.newerrorlogmonitoring.domain.common.exceptions.UnclassifiedLogException;
 import com.rb.monitoring.newerrorlogmonitoring.domain.logger.dto.LogEntry;
 import com.rb.monitoring.newerrorlogmonitoring.infrastructure.consumer.MailConsumer;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.springframework.boot.logging.LogLevel;
 import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
@@ -28,7 +30,7 @@ public class NotificationMailService {
     public void sendMail(LogEntry logEntry) {
         var urlExposed = appProperties.getRestUrlLogExposed().replace(KEY_ID_LOG_ENTRY, logEntry.getId().toString());
         var content = "Bonjour,\n\n" +
-                "Une nouvelle erreur a été détectée sur le service " + logEntry.getService().getServiceName() + " le " + logEntry.getDate().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG, FormatStyle.SHORT)) + ".\n\n" +
+                "Une nouvelle erreur a été détectée sur le service " + logEntry.getEnvironment().getService().getServiceName() + " le " + logEntry.getDate().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG, FormatStyle.SHORT)) + ".\n\n" +
                 "Voici le message d'erreur : \n" + logEntry.getMessage() + "\n\n" +
                 "Consultez les infos complètes ici : " + urlExposed + "\n\n" +
                 "Cordialement,\n" +
@@ -41,13 +43,25 @@ public class NotificationMailService {
 
     public void sendMail(ServerDownException e) {
         getDestinations(false).forEach(destination ->
-                mailConsumer.sendMail(e.getMessage(), "Serveur down: " + e.getServiceProps().getServiceName(), destination, true)
+                mailConsumer.sendMail(e.getMessage(), "Serveur down: " + e.getServiceName(), destination, true)
         );
     }
 
     public void sendMail(Exception e) {
         getDestinations(true).forEach(destination ->
                 mailConsumer.sendMail(ExceptionUtils.getStackTrace(e), "["+ appProperties.getApplicationName()+"][ADMIN][ERROR] Exception happened in the application service", destination, false)
+        );
+    }
+
+    public void sendMail(UnclassifiedLogException e) {
+        getDestinations(true).forEach(destination ->
+                mailConsumer.sendMail(ExceptionUtils.getStackTrace(e), "["+ appProperties.getApplicationName()+"][ADMIN][WARN] Unclassified Log Exception", destination, false)
+        );
+    }
+
+    public void sendMail(String messsage, LogLevel logLevel, boolean onlyAdmin) {
+        getDestinations(onlyAdmin).forEach(destination ->
+                mailConsumer.sendMail(messsage, "["+ appProperties.getApplicationName()+"][ADMIN]["+ logLevel +"] Custom notification", destination, false)
         );
     }
 

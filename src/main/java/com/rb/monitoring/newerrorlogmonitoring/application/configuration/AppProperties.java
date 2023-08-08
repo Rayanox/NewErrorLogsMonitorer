@@ -1,6 +1,7 @@
 package com.rb.monitoring.newerrorlogmonitoring.application.configuration;
 
 import com.rb.monitoring.newerrorlogmonitoring.application.configuration.services.ServiceProperties;
+import com.rb.monitoring.newerrorlogmonitoring.application.configuration.services.environment.EnvironmentProperties;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -13,8 +14,12 @@ public class AppProperties {
     private String applicationName;
     private String companyPackage;
     private String restUrlLogExposed;
+    private Integer cleanUnseenLogsIntervalleDays;
+    private Integer disableHourFrom;
+    private Integer disableHourTo;
 
     private List<ServiceProperties> services;
+    private List<EnvironmentProperties> environments;
 
     public ServiceProperties of(String serviceName) {
         return services.stream()

@@ -1,7 +1,11 @@
 package com.rb.monitoring.newerrorlogmonitoring.domain.logger.factory;
 
 import com.rb.monitoring.newerrorlogmonitoring.application.configuration.AppProperties;
+import com.rb.monitoring.newerrorlogmonitoring.application.configuration.services.LogPatternProperties;
+import com.rb.monitoring.newerrorlogmonitoring.application.configuration.services.ServiceConfItem;
 import com.rb.monitoring.newerrorlogmonitoring.application.configuration.services.ServiceProperties;
+import com.rb.monitoring.newerrorlogmonitoring.application.configuration.services.environment.EnvironmentWrapperConfig;
+import com.rb.monitoring.newerrorlogmonitoring.domain.common.services.NotificationService;
 import com.rb.monitoring.newerrorlogmonitoring.domain.common.utils.RegexUtils;
 import com.rb.monitoring.newerrorlogmonitoring.domain.logger.dto.LogEntry;
 import org.springframework.boot.logging.LogLevel;
@@ -18,8 +22,11 @@ import static com.rb.monitoring.newerrorlogmonitoring.domain.common.utils.RegexU
 
 public abstract class LogsFactory {
 
-    protected ServiceProperties serviceConf;
+    protected ServiceConfItem serviceConf;
+    protected EnvironmentWrapperConfig environment;
+    protected LogPatternProperties patternProperties;
     protected AppProperties appProperties;
+    protected NotificationService notificationService;
 
     protected final Iterator<String> logs;
     protected final List<String> logLinesInput;
@@ -31,11 +38,14 @@ public abstract class LogsFactory {
 
     protected boolean isInExceptionProcessing = false;
 
-    public LogsFactory(List<String> logs, ServiceProperties serviceConf, AppProperties appProperties) {
+    public LogsFactory(List<String> logs, ServiceConfItem serviceConf, AppProperties appProperties, NotificationService notificationService, EnvironmentWrapperConfig environment) {
         this.logs = logs.iterator();
         this.logLinesInput = logs;
         this.serviceConf = serviceConf;
+        this.environment = environment;
         this.appProperties = appProperties;
+        this.notificationService = notificationService;
+        this.patternProperties = serviceConf.getPatterns();
     }
 
     public abstract List<LogEntry> process();
