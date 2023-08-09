@@ -1,8 +1,6 @@
 package com.rb.monitoring.newerrorlogmonitoring;
 
-import com.rb.monitoring.newerrorlogmonitoring.application.configuration.AppProperties;
 import com.rb.monitoring.newerrorlogmonitoring.application.configuration.services.ServiceConfItem;
-import com.rb.monitoring.newerrorlogmonitoring.application.configuration.services.ServiceProperties;
 import com.rb.monitoring.newerrorlogmonitoring.application.configuration.services.environment.EnvironmentWrapperConfig;
 import com.rb.monitoring.newerrorlogmonitoring.domain.logger.dto.ExceptionEntry;
 import com.rb.monitoring.newerrorlogmonitoring.domain.logger.dto.LogEntry;
@@ -23,7 +21,6 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 
 import static java.util.Collections.emptyList;
@@ -38,6 +35,8 @@ public class LogServiceTest {
     private static final String LOGFILE_UPDATED_TEST_PATH = "mediation.front-office.mobile.bus-updated.log";
     private static final String LOGFILE_UPDATED_NEW_LOG_TEST_PATH = "mediation.front-office.mobile.bus-updated-newLog.log";
     private static final String LOGFILE_UPDATED_2DIFFERENT_DATES_TEST_PATH = "mediation.front-office.mobile.bus-updatedWith2DifferentDates.log";
+    private static final String LOGFILE_TEST_MOVED_LINE_PATH = "mediation.front-office.mobile.bus-movedLine.log";
+    private static final String LOGFILE_TEST_MOVED_LINE_AND_VERSION_CHANGED_PATH = "mediation.front-office.mobile.bus-movedLineAndVersionsChanged.log";
 
     @Autowired
     private List<ServiceConfItem> serviceConfItems;
@@ -47,6 +46,8 @@ public class LogServiceTest {
     private List<String> logInputUpdated;
     private List<String> logInputUpdatedNewLog;
     private List<String> logInputUpdated2DifferentDates;
+    private List<String> logInputMovedLine;
+    private List<String> logInputMovedLineAndVersionChanged;
 
     private ServiceConfItem of(String serviceName) {
         return serviceConfItems.stream()
@@ -62,6 +63,8 @@ public class LogServiceTest {
             logInputUpdated = Files.readAllLines(Path.of(ClassLoader.getSystemResource(LOGFILE_UPDATED_TEST_PATH).toURI()));
             logInputUpdatedNewLog = Files.readAllLines(Path.of(ClassLoader.getSystemResource(LOGFILE_UPDATED_NEW_LOG_TEST_PATH).toURI()));
             logInputUpdated2DifferentDates = Files.readAllLines(Path.of(ClassLoader.getSystemResource(LOGFILE_UPDATED_2DIFFERENT_DATES_TEST_PATH).toURI()));
+            logInputMovedLine = Files.readAllLines(Path.of(ClassLoader.getSystemResource(LOGFILE_TEST_MOVED_LINE_PATH).toURI()));
+            logInputMovedLineAndVersionChanged = Files.readAllLines(Path.of(ClassLoader.getSystemResource(LOGFILE_TEST_MOVED_LINE_AND_VERSION_CHANGED_PATH).toURI()));
         } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
 
@@ -183,6 +186,34 @@ public class LogServiceTest {
         List<LogEntry> logs = logService.readLogs(logInputUpdated2DifferentDates, afterDate, serviceConf, environment);
 
         Assertions.assertEquals(2, logs.size());
+    }
+
+    @Test
+    public void lineMovedTest() {
+        ServiceConfItem serviceConf = of("mediation.front-office.mobile.bus");
+        EnvironmentWrapperConfig environment = serviceConf.getEnvironments().get(0);
+
+        List<LogEntry> logs = logService.readLogs(logInput, null, serviceConf, environment);
+        List<LogEntry> newLogsArrived = logService.readLogs(logInputMovedLine, null, serviceConf, environment);
+        var entryUpdated = newLogsArrived.get(newLogsArrived.size()-1);
+
+        List<LogEntry> newErrors = logService.getNewLogs(logs, newLogsArrived);
+
+        Assertions.assertEquals(0, newErrors.size());
+        Assertions.assertTrue(entryUpdated.getException().getCompanyStacktrace().contains("00000")); // test replaced line number (update test)
+    }
+
+    @Test
+    public void movedLineAndVersionChangedTest(){
+        ServiceConfItem serviceConf = of("mediation.front-office.mobile.bus");
+        EnvironmentWrapperConfig environment = serviceConf.getEnvironments().get(0);
+
+        List<LogEntry> logs = logService.readLogs(logInput, null, serviceConf, environment);
+        List<LogEntry> newLogsArrived = logService.readLogs(logInputMovedLineAndVersionChanged, null, serviceConf, environment);
+
+        List<LogEntry> newErrors = logService.getNewLogs(logs, newLogsArrived);
+
+        Assertions.assertEquals(0, newErrors.size());
     }
 
 

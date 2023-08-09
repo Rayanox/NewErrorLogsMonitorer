@@ -12,7 +12,7 @@ import java.util.Objects;
 @Log4j2
 @Entity
 @Builder
-@Getter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = {"endOfStacktrace", "companyStacktrace"})

@@ -149,7 +149,7 @@ public class LogsFactoryFromStart extends LogsFactory {
             return;
         }
         currentLogLine = logs.next();
-        lineIndex++;
+        ++lineIndex;
     }
 
     private ExceptionEntry processException(boolean isCausedBy) {
@@ -237,7 +237,7 @@ public class LogsFactoryFromStart extends LogsFactory {
                 if(isNetworkException(exceptionEntry, patternProperties)) {
                     log.debug("OK, on a un message d'erreur réseau -> " + exceptionEntry.getMessage());
                 } else {
-                    notificationService.notifySubscribers(new UnclassifiedLogException(newLogEntry, lineIndex));
+//                    notificationService.notifySubscribers(new UnclassifiedLogException(newLogEntry, lineIndex));
                 }
             }else {
                 log.debug("OK, on a une stack company");

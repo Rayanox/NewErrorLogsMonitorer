@@ -1,6 +1,5 @@
 package com.rb.monitoring.newerrorlogmonitoring.domain.logger;
 
-import com.rb.monitoring.newerrorlogmonitoring.application.configuration.AppProperties;
 import com.rb.monitoring.newerrorlogmonitoring.domain.logger.dto.LogEntry;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -11,7 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 public class NewLogValidatorRule {
 
-    private AppProperties appProperties;
+    private StacktraceUpdateService stacktraceUpdateService;
 
     /**
      * Validate if the log is new by validating theses rules:
@@ -29,8 +28,31 @@ public class NewLogValidatorRule {
         }
 
         return previousLogSaved.stream()
-                .filter(log -> log.equals(logNew))
+                .filter(log -> processEquals(log,logNew))
                 .findAny()
                 .isEmpty();
+    }
+
+    private boolean processEquals(LogEntry previousLogSaved, LogEntry logNew) {
+        var areEquals = previousLogSaved.equals(logNew);
+        if(areEquals) {
+            return true;
+        }
+
+        if(checkSureInegalities(previousLogSaved, logNew)) {
+            return false;
+        }
+
+        if(stacktraceUpdateService.detectStacktraceUpdate(previousLogSaved, logNew, areEquals)) {
+            stacktraceUpdateService.processStacktraceUpdate(previousLogSaved, logNew);
+            return true;
+        }else {
+            return false;
+        }
+    }
+
+    private boolean checkSureInegalities(LogEntry previousLogSaved, LogEntry logNew) {
+        return !previousLogSaved.getLogLevel().equals(logNew.getLogLevel())
+                || !previousLogSaved.getClassNameLog().equals(logNew.getClassNameLog());
     }
 }
