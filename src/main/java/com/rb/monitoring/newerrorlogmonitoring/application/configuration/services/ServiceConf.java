@@ -33,7 +33,7 @@ public class ServiceConf {
     }
 
     private List<EnvironmentWrapperConfig> mapToEnvironmentWrappers(ServiceProperties service, List<EnvironmentProperties>  environmentProperties) {
-        return service.getServicePropertiesByEnvironment().entrySet().stream()
+        return service.getPropertiesByEnvironment().entrySet().stream()
                 .map(entry -> mapToEnvironmentWrapper(entry, environmentProperties))
                 .toList();
     }

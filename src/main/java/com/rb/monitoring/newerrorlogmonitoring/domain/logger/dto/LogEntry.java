@@ -56,7 +56,7 @@ public class LogEntry {
                 .append("id=").append(id)
                 .append(", date=").append(date);
         if (environment != null) {
-            builder.append(", environment=").append(environment);
+            builder.append(", environment=").append(environment.getEnvironmentName());
             if (environment.getService() != null) {
                 builder.append(", service=").append(environment.getService().getServiceName());
             }

@@ -99,6 +99,7 @@ public class Core {
         }else {
             environmentDb.setFirstIndexedDate(LocalDateTime.now());
             environmentRepository.save(environmentDb);
+            log.info("First indexation done for environment {} (service {})", environmentDb.getEnvironmentName(), environmentDb.getService().getServiceName());
         }
     }
 

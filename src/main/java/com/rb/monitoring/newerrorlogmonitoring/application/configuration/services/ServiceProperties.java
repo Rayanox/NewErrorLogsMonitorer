@@ -11,5 +11,5 @@ public class ServiceProperties {
     private String serviceName;
 
     private LogPatternProperties patterns;
-    private Map<String, ServiceEnvironmentConfig> servicePropertiesByEnvironment;
+    private Map<String, ServiceEnvironmentConfig> propertiesByEnvironment;
 }

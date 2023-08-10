@@ -16,10 +16,14 @@ public class LogConsumer {
     public List<String> fetchLogs(EnvironmentWrapperConfig environmentConf) {
         var logServerProperties = environmentConf.getServiceProperties().getLogServers();
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(java.net.URI.create(logServerProperties.getUrl()))
-                .setHeader("Authorization", "BASIC " + logServerProperties.getBasicAuthToken())
-                .build();
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(java.net.URI.create(logServerProperties.getUrl()));
+
+        if (logServerProperties.getBasicAuthToken() != null) {
+            requestBuilder.setHeader("Authorization", "BASIC " + logServerProperties.getBasicAuthToken());
+        }
+        var request = requestBuilder.build();
+
 
         HttpResponse<String> response;
         try {

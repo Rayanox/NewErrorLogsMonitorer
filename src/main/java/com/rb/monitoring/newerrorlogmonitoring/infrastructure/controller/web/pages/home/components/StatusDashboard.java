@@ -9,8 +9,9 @@ import com.rb.monitoring.newerrorlogmonitoring.domain.status.StatusEnum;
 import com.rb.monitoring.newerrorlogmonitoring.domain.status.StatusService;
 import com.rb.monitoring.newerrorlogmonitoring.infrastructure.repositories.ServicesRepository;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.spring.annotation.RouteScope;
@@ -128,7 +129,7 @@ public class StatusDashboard extends VerticalLayout {
 //            statusService.checkStatus(environment);
             //TODO: To code the checkStatus method
             log.info("TODO: To code the checkStatus method");
-            getUI().ifPresent(ui -> ui.getPage().reload());
+            showNotImplementedPopin();
         });
         return button;
     }
@@ -139,7 +140,7 @@ public class StatusDashboard extends VerticalLayout {
 //            statusService.forceReset(environment);
             //TODO: To code the forceReset method
             log.info("TODO: To code the forceReset method");
-            getUI().ifPresent(ui -> ui.getPage().reload());
+            showNotImplementedPopin();
         });
         return button;
     }
@@ -147,7 +148,7 @@ public class StatusDashboard extends VerticalLayout {
 
     private void processOpenLogsClick(Environment environment, String dateLogsFrom) {
         if(dateLogsFrom != null) {
-            getUI().ifPresent(ui -> ui.getPage().open("/getLogEntriesFrom?date=" + dateLogsFrom, "Logs " + dateLogsFrom));
+            getUI().ifPresent(ui -> ui.getPage().open("/logs/getLogEntriesFrom?date=" + dateLogsFrom, "Logs " + dateLogsFrom));
         }else {
 //            notificationService.notifyAdminCustom("No error found while deducting date after clicking on environment button", LogLevel.WARN);
             log.warn("No error found while deducting date after clicking on environment button");
@@ -244,6 +245,9 @@ public class StatusDashboard extends VerticalLayout {
         return null;
     }
 
-
+    private void showNotImplementedPopin() {
+        Notification notification = Notification.show("Not implemented yet");
+        notification.addThemeVariants(NotificationVariant.LUMO_WARNING);
+    }
 
 }
