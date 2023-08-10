@@ -132,6 +132,7 @@ public class Core {
     private void updateApplicationState(Application application) {
         if(!application.isFirstIndexed()) {
             application.setFirstIndexationDate(LocalDateTime.now());
+            log.info("First indexation done");
         }
         application.setLastProcessedDate(LocalDateTime.now());
         applicationRepository.saveAndFlush(application);

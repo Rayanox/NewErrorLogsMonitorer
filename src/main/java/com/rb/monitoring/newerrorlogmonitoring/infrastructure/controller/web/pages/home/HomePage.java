@@ -21,7 +21,7 @@ public class HomePage extends VerticalLayout {
         add(
                 new HeaderComponent(),
                 new MainHpComponent(
-                        new H1("BACKEND Dashboard")
+                        new H1("Dashboard Java Status")
                 ),
                 statusDashboard
         );
