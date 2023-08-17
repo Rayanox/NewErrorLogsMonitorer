@@ -25,12 +25,12 @@ public class NotificationService {
     }
 
     public void notifySubscribers(ServerDownException e) {
-        log.error(e.getMessage());
+        log.error(e);
         mailService.sendMail(e);
     }
 
     public void notifySubscribers(Exception e) {
-        log.error(e.getMessage());
+        log.error(e);
         mailService.sendMail(e);
     }
 
@@ -55,4 +55,5 @@ public class NotificationService {
         log.info(message);
         mailService.sendMail(message, warn, true);
     }
+
 }

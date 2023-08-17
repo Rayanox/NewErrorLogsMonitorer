@@ -2,6 +2,7 @@ package com.rb.monitoring.newerrorlogmonitoring.domain.logger.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.rb.monitoring.newerrorlogmonitoring.domain.common.Environment;
 import com.rb.monitoring.newerrorlogmonitoring.domain.status.Status;
 import jakarta.persistence.*;
@@ -18,6 +19,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @EqualsAndHashCode(of = {"exception"})
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@JsonPropertyOrder({"id","date", "message", "classNameLog", "logLevel", "envInfos"})
 public class LogEntry {
 
     @Id
@@ -46,6 +48,13 @@ public class LogEntry {
     @JsonIgnore
     @ManyToOne(targetEntity = Environment.class, fetch = FetchType.LAZY)
     private Environment environment;
+
+    public String getEnvInfos() {
+        if (environment != null) {
+            return String.format("Service(Environment): %s (%s)", environment.getService().getServiceName(), environment.getPrettyEnvironmentName());
+        }
+        return null;
+    }
 
     @Override
     public String toString() {

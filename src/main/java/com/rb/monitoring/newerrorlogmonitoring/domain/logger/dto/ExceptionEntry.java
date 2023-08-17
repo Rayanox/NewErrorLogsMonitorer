@@ -2,11 +2,15 @@ package com.rb.monitoring.newerrorlogmonitoring.domain.logger.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.rb.monitoring.newerrorlogmonitoring.domain.common.utils.RegexUtils;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.annotation.Order;
 
+import java.util.Collections;
 import java.util.Objects;
 
 @Log4j2
@@ -15,6 +19,7 @@ import java.util.Objects;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonPropertyOrder({"companyStacktracePretty", "id", "message"})
 @EqualsAndHashCode(of = {"endOfStacktrace", "companyStacktrace"})
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "fullCompanyStacktrace", "depth", "fullStacktrace"})
 public class ExceptionEntry {
@@ -30,6 +35,7 @@ public class ExceptionEntry {
     private String message;
     @Lob
     private String companyStacktrace;
+
     @Lob
     @NonNull
     private String stacktrace;
@@ -81,6 +87,16 @@ public class ExceptionEntry {
         return Objects.nonNull(cause)
                 ? cause.getDepth() + 1
                 : 1;
+    }
+
+    public String getCompanyStacktracePretty() {
+        return buildCompanyStacktracePretty();
+    }
+
+    private String buildCompanyStacktracePretty() {
+        var stack = RegexUtils.extractGroupsByRegex(getCompanyStacktrace(), "(\\w+\\.\\w+)\\(");
+        Collections.reverse(stack);
+        return StringUtils.join(stack, " -> ");
     }
 
 }

@@ -8,5 +8,7 @@ import java.util.List;
 
 public interface LogEntryRepository extends JpaRepository<LogEntry, Long> {
 
-    List<LogEntry> findAllByDateGreaterThan(LocalDateTime from);
+    List<LogEntry> findAllByEnvironmentId(Long environment);
+
+    List<LogEntry> findAllByDateGreaterThanEqualAndEnvironmentId(LocalDateTime from, Long environment);
 }

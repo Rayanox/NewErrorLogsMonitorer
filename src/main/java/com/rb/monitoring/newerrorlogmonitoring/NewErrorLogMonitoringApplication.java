@@ -4,6 +4,9 @@ import com.rb.monitoring.newerrorlogmonitoring.application.configuration.AppProp
 import com.rb.monitoring.newerrorlogmonitoring.application.configuration.IhmProperties;
 import com.rb.monitoring.newerrorlogmonitoring.application.configuration.notifications.MailProperties;
 import com.rb.monitoring.newerrorlogmonitoring.application.configuration.services.environment.EnvironmentProperties;
+import com.vaadin.flow.component.page.AppShellConfigurator;
+import com.vaadin.flow.component.page.Push;
+import com.vaadin.flow.shared.communication.PushMode;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -12,7 +15,7 @@ import org.springframework.context.annotation.PropertySources;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-@SpringBootApplication
+@Push(PushMode.MANUAL)
 @EnableScheduling
 @EnableJpaRepositories
 @EnableConfigurationProperties({AppProperties.class, MailProperties.class, IhmProperties.class})
@@ -21,7 +24,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 		@PropertySource("classpath:mail-notifications.properties"),
 		@PropertySource("classpath:environments.properties")
 })
-public class NewErrorLogMonitoringApplication {
+@SpringBootApplication
+public class NewErrorLogMonitoringApplication implements AppShellConfigurator {
 
 	public static void main(String[] args) {
 		SpringApplication.run(NewErrorLogMonitoringApplication.class, args);

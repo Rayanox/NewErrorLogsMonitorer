@@ -14,7 +14,7 @@ public class AppProperties {
     private String applicationName;
     private String companyPackage;
     private String restUrlLogExposed;
-    private Integer cleanUnseenLogsIntervalleDays;
+//    private Integer cleanUnseenLogsIntervalleDays;
     private Integer disableHourFrom;
     private Integer disableHourTo;
 

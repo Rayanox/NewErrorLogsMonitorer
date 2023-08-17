@@ -4,6 +4,7 @@ import com.rb.monitoring.newerrorlogmonitoring.application.configuration.AppProp
 import com.rb.monitoring.newerrorlogmonitoring.domain.common.services.NotificationService;
 import com.rb.monitoring.newerrorlogmonitoring.domain.common.exceptions.ExceptionEntity;
 import com.rb.monitoring.newerrorlogmonitoring.domain.common.utils.ExceptionUtil;
+import com.rb.monitoring.newerrorlogmonitoring.domain.status.StatusService;
 import com.rb.monitoring.newerrorlogmonitoring.infrastructure.repositories.ExceptionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.concurrent.TimeUnit;
 
 @Log4j2
 @Component
@@ -25,6 +27,7 @@ public class Schedules {
     private final Core core;
     private final ExceptionRepository exceptionRepository;
     private final NotificationService notifications;
+    private final StatusService statusService;
 
     @Scheduled(fixedDelayString = "#{${app.cron.minutes-intervalle} * 60000}")
     public void cron() {
@@ -40,6 +43,19 @@ public class Schedules {
             notifications.notifySubscribers(new Exception("Error catched by cron", e));
         }
     }
+
+    @Scheduled(fixedDelay = 1, timeUnit = TimeUnit.HOURS)
+    public void logCheckCleaner() {
+        if(isDisablePeriod()) {
+            log.debug("Cron 'logCheckCleaner' is disabled");
+            return;
+        }
+        statusService.processLogCheckClean();
+    }
+
+    /*
+        PRIVATES
+     */
 
     private boolean isDisablePeriod() {
         LocalTime now = LocalTime.now();

@@ -1,9 +1,6 @@
 package com.rb.monitoring.newerrorlogmonitoring.domain.status;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.rb.monitoring.newerrorlogmonitoring.domain.common.Service;
-import com.rb.monitoring.newerrorlogmonitoring.domain.logger.dto.LogEntry;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,7 +20,8 @@ public class Status {
 
     private LocalDateTime insertionDate;
     private LocalDateTime lastSeenDate;
-    private boolean hasToBeChecked;
-    private boolean firstIndexation;
+
+    private boolean checked;
+    private boolean persistentIndexed;
 
 }

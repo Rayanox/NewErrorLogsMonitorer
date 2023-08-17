@@ -24,9 +24,14 @@ public class LogEntriesRestController {
                 .orElseThrow();
     }
 
+    @GetMapping("/getLogEntries")
+    public List<LogEntry> getLogEntries(@RequestParam Long environmentId) {
+        return logEntryRepository.findAllByEnvironmentId(environmentId);
+    }
+
     @GetMapping("/getLogEntriesFrom")
-    public List<LogEntry> getLogEntries(@RequestParam LocalDateTime date) {
-        return logEntryRepository.findAllByDateGreaterThan(date);
+    public List<LogEntry> getLogEntries(@RequestParam LocalDateTime date, @RequestParam Long environmentId) {
+        return logEntryRepository.findAllByDateGreaterThanEqualAndEnvironmentId(date, environmentId);
     }
 
 }

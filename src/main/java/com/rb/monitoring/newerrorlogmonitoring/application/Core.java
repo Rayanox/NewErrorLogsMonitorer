@@ -11,11 +11,11 @@ import com.rb.monitoring.newerrorlogmonitoring.domain.common.exceptions.ServerDo
 import com.rb.monitoring.newerrorlogmonitoring.domain.logger.LogService;
 import com.rb.monitoring.newerrorlogmonitoring.domain.logger.dto.LogEntry;
 import com.rb.monitoring.newerrorlogmonitoring.infrastructure.consumer.LogConsumer;
+import com.rb.monitoring.newerrorlogmonitoring.infrastructure.controller.web.pages.common.PushService;
 import com.rb.monitoring.newerrorlogmonitoring.infrastructure.repositories.ApplicationRepository;
 import com.rb.monitoring.newerrorlogmonitoring.infrastructure.repositories.EnvironmentRepository;
 import com.rb.monitoring.newerrorlogmonitoring.infrastructure.repositories.LogEntryRepository;
 import com.rb.monitoring.newerrorlogmonitoring.infrastructure.repositories.ServicesRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
@@ -39,6 +39,7 @@ public class Core {
     private final EnvironmentRepository environmentRepository;
     private final LogEntryRepository logEntryRepository;
     private final AppProperties appProperties;
+    private final PushService pushService;
 
     public void process() {
         var application = getApplication();
@@ -62,7 +63,7 @@ public class Core {
                             .peek(logSeenDb -> logSeenDb.getStatus().setLastSeenDate(LocalDateTime.now()))
                             .forEach(logSeenDb -> logEntryRepository.save(logSeenDb));
 
-                    cleanDbLogsIfNecessary(logEntriesDb);
+//                    cleanDbLogsIfNecessary(logEntriesDb);
                     processNotifications(newLogsDetected, environmentDb);
                 }catch (ServerDownException e) {
                     notifications.notifySubscribers(e);
@@ -73,16 +74,16 @@ public class Core {
         updateApplicationState(application);
     }
 
-    private void cleanDbLogsIfNecessary(List<LogEntry> logEntriesDb) {
-        var logsToClean = logEntriesDb.stream()
-                .filter(logEntry -> logEntry.getStatus().getInsertionDate().isBefore(LocalDateTime.now().minusDays(appProperties.getCleanUnseenLogsIntervalleDays())))
-                .collect(Collectors.toList());
-
-        if(!logsToClean.isEmpty()) {
-            notifications.notifyInfoCleanLogs(logsToClean);
-            logEntryRepository.deleteAll(logsToClean);
-        }
-    }
+//    private void cleanDbLogsIfNecessary(List<LogEntry> logEntriesDb) {
+//        var logsToClean = logEntriesDb.stream()
+//                .filter(logEntry -> logEntry.getStatus().getInsertionDate().isBefore(LocalDateTime.now().minusDays(appProperties.getCleanUnseenLogsIntervalleHours())))
+//                .collect(Collectors.toList());
+//
+//        if(!logsToClean.isEmpty()) {
+//            notifications.notifyInfoCleanLogs(logsToClean);
+//            logEntryRepository.deleteAll(logsToClean);
+//        }
+//    }
 
     private Service getDbServiceOrCreate(ServiceConfItem service) {
         var dbService = servicesRepository.findByServiceName(service.getServiceName());
@@ -100,6 +101,9 @@ public class Core {
             environmentDb.setFirstIndexedDate(LocalDateTime.now());
             environmentRepository.save(environmentDb);
             log.info("First indexation done for environment {} (service {})", environmentDb.getEnvironmentName(), environmentDb.getService().getServiceName());
+            if(!newLogsDetected.isEmpty()) {
+                pushService.updateDashboard();
+            }
         }
     }
 
@@ -108,8 +112,7 @@ public class Core {
         newLogsDetected.forEach(logEntry ->  {
             logEntry.getStatus().setInsertionDate(LocalDateTime.now());
             logEntry.setEnvironment(environmentDb);
-            logEntry.getStatus().setHasToBeChecked(environmentDb.isFirstIndexed());
-            logEntry.getStatus().setFirstIndexation(!environmentDb.isFirstIndexed());
+            logEntry.getStatus().setPersistentIndexed(!environmentDb.isFirstIndexed());
 
             logEntriesDb.add(logEntry);
         });

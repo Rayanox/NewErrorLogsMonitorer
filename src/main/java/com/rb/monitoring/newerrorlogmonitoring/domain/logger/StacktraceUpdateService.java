@@ -41,6 +41,12 @@ public class StacktraceUpdateService {
     }
 
     private boolean areUnifiedEquals(String previousStacktrace, String newStacktrace) {
+        if((previousStacktrace == null && newStacktrace != null) || (previousStacktrace != null && newStacktrace == null)) {
+            return STACKS_ARE_DIFFERENT;
+        }else if (previousStacktrace == null && newStacktrace == null) {
+            return STACKS_ARE_EQUALS;
+        }
+
         var previousStacktraceSimplified = previousStacktrace.replaceAll(PATTERN_VERSION, REMPLACEMENT_VERSION).replaceAll(PATTERN_LINE_NUMBER, REMPLACEMENT_LINE_NUMBER);
         var newStacktraceSimplified = newStacktrace.replaceAll(PATTERN_VERSION, REMPLACEMENT_VERSION).replaceAll(PATTERN_LINE_NUMBER, REMPLACEMENT_LINE_NUMBER);
 
