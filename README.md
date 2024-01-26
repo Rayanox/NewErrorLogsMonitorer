@@ -8,7 +8,7 @@ Currently, the program is able to scan the logs of a PREPROD environment and to 
 [![TNR Tool](https://raw.githubusercontent.com/Rayanox/NewErrorLogsMonitorer/main/Image-dashboard.JPG)](https://youtu.be/CEx09YiQbDk "TNR tool")
 
 ## Next evolution
-This program is involving and is to become a central tool for the IT service (usefull dashboard for following processes and starting actions).
+This program is involving and is intented to become a central tool for the IT service (usefull dashboard for following processes and starting actions).
 
 ### Help you at work (IT management and process organization helper)
 
