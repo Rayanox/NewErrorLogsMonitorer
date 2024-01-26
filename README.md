@@ -5,6 +5,8 @@ A program than constantly scans the logs on an environment (PREPROD for my purpo
 
 Currently, the program is able to scan the logs of a PREPROD environment and to store them in a database. It is also able to detect new error logs and to send an email to the IT service to alert them. The program is also able to detect when your environments (PREPROD now) has a regression and to send an email to the IT service to alert them.
 
+[![TNR Tool](https://raw.githubusercontent.com/Rayanox/NewErrorLogsMonitorer/main/Image-dashboard.JPG)](https://youtu.be/CEx09YiQbDk "TNR tool")
+
 ## Next evolution
 This program is involving and is to become a central tool for the IT service (usefull dashboard for following processes and starting actions).
 
