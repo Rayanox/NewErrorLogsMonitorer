@@ -114,12 +114,12 @@ public class HomePage extends VerticalLayout {
                         statusDashboard.setAlertVariables(redLightImage, redLightCloudImage);
                         statusDashboard.updateAlertDisplay();
 
-                        popInService.showPopIn("Dashboard mis à jour", LogLevel.INFO);
+                        popInService.showPopIn("Dashboard updated", LogLevel.INFO);
                     }, () -> {
-                        popInService.showPopIn("Dashboard non trouvé", LogLevel.ERROR);
+                        popInService.showPopIn("Dashboard unfound", LogLevel.ERROR);
                     });
         } catch (Exception e) {
-            popInService.showPopIn("Erreur lors de la MAJ du Dashboard", LogLevel.ERROR);
+            popInService.showPopIn("Error while updating the Dashboard", LogLevel.ERROR);
         }
     }
 
